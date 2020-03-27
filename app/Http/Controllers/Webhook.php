@@ -126,7 +126,6 @@ class Webhook extends Controller
         return $this->response;
     }
 
-	//ADD FRIENDS
     private function followCallback($event)
     {
         $res = $this->bot->getProfile($event['source']['userId']);
@@ -135,25 +134,16 @@ class Webhook extends Controller
             $profile = $res->getJSONDecodedBody();
 
             // create welcome message
-            $message1  = "Salam kenal, " . $profile['displayName'] . "!\n";
-			$message2  = "Selamat datang di Tebak Judul Lagu \n";
-			$message3  = "Bot ini merupakan kuis tebak lagu yang dapat digunakan oleh siapa saja yang ingin mengasah pengetahuannya tentang judul lagu terutama lagu Indonesia.\n";
-			$message  = "Bot akan memunculkan sepenggal lirik lagu dan " . $profile['displayName'] . "silahkan menjawab judul lagu pada pilihan yang tersedia.\n";
-            $message .= "Untuk bermain, silakan kirim pesan \"MULAI\" untuk memulai Kuis Tebak Lagu.";
-            $textMessageBuilder1 = new TextMessageBuilder($message1);
-			$textMessageBuilder2 = new TextMessageBuilder($message2);
-			$textMessageBuilder3 = new TextMessageBuilder($message3);
-			$textMessageBuilder4 = new TextMessageBuilder($message);
+            $message  = "Salam kenal, " . $profile['displayName'] . "!\n";
+            $message .= "Silakan kirim pesan \"MULAI\" untuk memulai kuis Tebak Kode.";
+            $textMessageBuilder = new TextMessageBuilder($message);
 
             // create sticker message
             $stickerMessageBuilder = new StickerMessageBuilder(1, 3);
 
             // merge all message
             $multiMessageBuilder = new MultiMessageBuilder();
-            $multiMessageBuilder->add($textMessageBuilder1);
-			$multiMessageBuilder->add($textMessageBuilder2);
-			$multiMessageBuilder->add($textMessageBuilder3);
-			$multiMessageBuilder->add($textMessageBuilder4);
+            $multiMessageBuilder->add($textMessageBuilder);
             $multiMessageBuilder->add($stickerMessageBuilder);
 
             // send reply message
@@ -168,7 +158,6 @@ class Webhook extends Controller
         }
     }
 
-	//RESPON TEKS DARI USER
     private function textMessage($event)
     {
         $userMessage = $event['message']['text'];
@@ -183,7 +172,7 @@ class Webhook extends Controller
                 // send question no.1
                 $this->sendQuestion($event['replyToken'], 1);
             } else {
-				$message = 'Maaf, kami tidak dapat memahami pesan Anda. Silakan ketik "MULAI" untuk memulai kuis.';
+                $message = 'Silakan kirim pesan "MULAI" untuk memulai kuis.';
                 $textMessageBuilder = new TextMessageBuilder($message);
                 $this->bot->replyMessage($event['replyToken'], $textMessageBuilder);
             }
@@ -194,14 +183,13 @@ class Webhook extends Controller
         }
     }
 
-	//RESPON STICKER DARI USER
     private function stickerMessage($event)
     {
         // create sticker message
         $stickerMessageBuilder = new StickerMessageBuilder(1, 106);
 
         // create text message
-		$$message = 'Maaf, kami tidak dapat memahami stiker Anda. Silakan ketik "MULAI" untuk memulai kuis.';
+        $message = 'Silakan kirim pesan "MULAI" untuk memulai kuis.';
         $textMessageBuilder = new TextMessageBuilder($message);
 
         // merge all message
@@ -213,7 +201,6 @@ class Webhook extends Controller
         $this->bot->replyMessage($event['replyToken'], $multiMessageBuilder);
     }
 
-	//MENGIRIM PERTANYAAN
     private function sendQuestion($replyToken, $questionNum=1)
     {
         // get question from database
@@ -226,7 +213,7 @@ class Webhook extends Controller
         }
 
         // prepare button template
-        $buttonTemplate = new ButtonTemplateBuilder($question['number']."/10", $question['text'], null, $options);
+        $buttonTemplate = new ButtonTemplateBuilder($question['number']."/10", $question['text'], $question['image'], $options);
 
         // build message
         $messageBuilder = new TemplateMessageBuilder("Gunakan mobile app untuk melihat soal", $buttonTemplate);
@@ -235,7 +222,6 @@ class Webhook extends Controller
         $response = $this->bot->replyMessage($replyToken, $messageBuilder);
     }
 
-	//CEK PERTANYAAN
     private function checkAnswer($message, $replyToken)
     {
         // if answer is true, increment score
@@ -263,8 +249,8 @@ class Webhook extends Controller
 
             // create play again message
             $message = ($this->user['score'] < 8) ?
-                'Sudah Menyerah? Jika belum menyerah silahkan coba lagi. Ketik "MULAI" untuk bermain lagi!':
-                'Mantap gan! Jika ingin bermain lagi silahkan Ketik "MULAI" untuk bermain lagi!';
+                'Wkwkwk! Nyerah? Ketik "MULAI" untuk bermain lagi!':
+                'Great! Mantap bro! Ketik "MULAI" untuk bermain lagi!';
             $textMessageBuilder2 = new TextMessageBuilder($message);
 
             // merge all message
